@@ -34,7 +34,7 @@ function uploadPhotos(emailSubject, domainName, googleDriveFolderName = null) {
 }
 
 function uploadPhotoToDrive_(email, folderName, domainName) {
-  const folder = findOrCreateFolder(folderName);
+  const folder = findOrCreateFolder_(folderName);
   const message = email.getMessages()[0];
   const regex = new RegExp(`"https://${domainName}([/\\w]+)"`, 'g');
   Logger.log(`Looking for messages using ${regex.toString()}`);
