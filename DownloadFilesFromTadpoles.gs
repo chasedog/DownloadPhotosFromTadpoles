@@ -33,15 +33,28 @@ function uploadPhotos(emailSubject, domainName, googleDriveFolderName = null) {
   uploadPhotoToDrive_(email, `${formattedDate} ${googleDriveFolderName}`, domainName);
 }
 
+function deletePhotos(searchTerm, toDelete) {
+  const folders = DriveApp.getFolders();
+  while (toDelete > 0 && folders.hasNext()) {
+    const folder = folders.next();
+    const folderName = folder.getName();
+    if (folderName.includes(searchTerm)) {
+      folder.setTrashed(true);
+      Logger.log(`Deleted ${folderName}`);
+      toDelete--;
+    }
+  }
+}
+
 function uploadPhotoToDrive_(email, folderName, domainName) {
   const folder = findOrCreateFolder_(folderName);
   const message = email.getMessages()[0];
-  const regex = new RegExp(`"https://${domainName}([/\\w]+)"`, 'g');
+  const regex = new RegExp(`(https://\\w*\.?${domainName})([/-\\w]+)\?`, 'g');
   Logger.log(`Looking for messages using ${regex.toString()}`);
 
   const all = Array.from(message.getBody().matchAll(regex));
   all.forEach(r => {
-    const uri = `https://${domainName}${r[1]}?d=t`;
+    const uri = `${r[1]}${r[2]}?download=t&d=t`
     const image = UrlFetchApp.fetch(uri).getBlob();
 
     folder.createFile(image);
